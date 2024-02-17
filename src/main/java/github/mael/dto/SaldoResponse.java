@@ -1,4 +1,4 @@
-package org.acme.dto;
+package github.mael.dto;
 
 public class SaldoResponse {
 

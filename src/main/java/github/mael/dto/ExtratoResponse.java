@@ -1,18 +1,18 @@
-package org.acme.dto;
+package github.mael.dto;
 
+import github.mael.model.TransacaoModel;
 import java.util.List;
-import org.acme.model.TransacaoModel;
 
 public class ExtratoResponse {
 
   private SaldoResponse saldo;
-  private List<Transacao> ultimasTransacoes;
+  private List<TransacaoModel> ultimasTransacoes;
 
 
   public ExtratoResponse() {
   }
 
-  public ExtratoResponse(SaldoResponse saldo, List<Transacao> ultimasTransacoes) {
+  public ExtratoResponse(SaldoResponse saldo, List<TransacaoModel> ultimasTransacoes) {
     this.saldo = saldo;
     this.ultimasTransacoes = ultimasTransacoes;
   }
@@ -25,11 +25,11 @@ public class ExtratoResponse {
     this.saldo = saldo;
   }
 
-  public List<Transacao> getUltimasTransacoes() {
+  public List<TransacaoModel> getUltimasTransacoes() {
     return ultimasTransacoes;
   }
 
-  public void setUltimasTransacoes(List<Transacao> ultimasTransacoes) {
+  public void setUltimasTransacoes(List<TransacaoModel> ultimasTransacoes) {
     this.ultimasTransacoes = ultimasTransacoes;
   }
 }

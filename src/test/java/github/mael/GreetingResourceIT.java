@@ -1,4 +1,4 @@
-package org.acme;
+package github.mael;
 
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 
