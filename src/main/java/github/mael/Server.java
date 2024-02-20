@@ -50,7 +50,7 @@ public class Server {
                 .setParameter("clienteId", clienteId)
                 .getSingleResult();
 
-            double saldo = (saldoAtual != null) ? saldoAtual.getValor() : 0.0;
+            Integer saldo = (saldoAtual != null) ? saldoAtual.getValor() : 0;
 
             String dataExtrato = String.valueOf(new Date());
 

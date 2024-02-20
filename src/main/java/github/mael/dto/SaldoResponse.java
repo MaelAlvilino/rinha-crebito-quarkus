@@ -2,14 +2,14 @@ package github.mael.dto;
 
 public class SaldoResponse {
 
-  private double total;
+  private Integer total;
   private String dataExtrato;
-  private double limite;
+  private Integer limite;
 
   public SaldoResponse() {
   }
 
-  public SaldoResponse(double total, String dataExtrato, double limite) {
+  public SaldoResponse(Integer total, String dataExtrato, Integer limite) {
     this.total = total;
     this.dataExtrato = dataExtrato;
     this.limite = limite;
@@ -19,7 +19,7 @@ public class SaldoResponse {
     return total;
   }
 
-  public void setTotal(double total) {
+  public void setTotal(Integer total) {
     this.total = total;
   }
 
@@ -35,7 +35,7 @@ public class SaldoResponse {
     return limite;
   }
 
-  public void setLimite(double limite) {
+  public void setLimite(Integer limite) {
     this.limite = limite;
   }
 }
