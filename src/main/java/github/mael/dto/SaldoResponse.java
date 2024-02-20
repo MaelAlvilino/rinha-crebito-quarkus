@@ -15,7 +15,7 @@ public class SaldoResponse {
     this.limite = limite;
   }
 
-  public double getTotal() {
+  public Integer getTotal() {
     return total;
   }
 
@@ -31,7 +31,7 @@ public class SaldoResponse {
     this.dataExtrato = dataExtrato;
   }
 
-  public double getLimite() {
+  public Integer getLimite() {
     return limite;
   }
 

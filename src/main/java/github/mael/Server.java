@@ -7,6 +7,7 @@ import github.mael.model.ClienteModel;
 import github.mael.model.TransacaoModel;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
@@ -74,16 +75,18 @@ public class Server {
             String tipo = request.getTipo();
             String descricao = request.getDescricao();
 
+            if (!isValid(request)) {
+                return RestResponse.status(404);
+            }
             ClienteModel cliente = entityManager.find(ClienteModel.class, id);
+
             if (cliente == null) {
                 return RestResponse.status(404);
             }
 
-            if (!isValid(request)) {
-                return RestResponse.status(404);
-            }
-
-            TypedQuery<SaldoModel> saldoQuery = entityManager.createQuery("SELECT s FROM SaldoModel s WHERE s.cliente = :cliente", SaldoModel.class);
+            TypedQuery<SaldoModel> saldoQuery = entityManager.createQuery("SELECT s FROM "
+                + "SaldoModel s WHERE s.cliente = :cliente", SaldoModel.class);
+            saldoQuery.setLockMode(LockModeType.PESSIMISTIC_WRITE);
             saldoQuery.setParameter("cliente", cliente);
             SaldoModel saldo = saldoQuery.getSingleResult();
 
@@ -105,17 +108,19 @@ public class Server {
             entityManager.merge(transacao);
             return RestResponse.ok(new TransacaoResponse(cliente.getLimite(), novoSaldo));
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
             return RestResponse.status(500);
         }
     }
 
     private boolean isValid(TransacaoRequest request) {
+        System.out.println(request.getDescricao().length() > 10);
         return request != null
             && request.getValor() != null
             && request.getValor() > 0
             && (request.getTipo().equals("c") || request.getTipo().equals("d"))
             && request.getDescricao() != null
-            && !request.getDescricao().isEmpty();
+            && !request.getDescricao().isEmpty()
+            && request.getDescricao().length() < 10;
     }
 }
