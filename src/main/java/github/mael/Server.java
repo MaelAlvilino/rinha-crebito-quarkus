@@ -93,7 +93,6 @@ public class Server {
             }
 
             saldo.setValor(novoSaldo);
-            entityManager.merge(saldo);
 
             TransacaoModel transacao = new TransacaoModel();
             transacao.setCliente(cliente);
@@ -101,6 +100,8 @@ public class Server {
             transacao.setTipo(tipo);
             transacao.setDescricao(descricao);
             transacao.setRealizadaEm(LocalDateTime.now());
+
+            entityManager.merge(saldo);
             entityManager.merge(transacao);
             return RestResponse.ok(new TransacaoResponse(cliente.getLimite(), novoSaldo));
         } catch (Exception e) {
