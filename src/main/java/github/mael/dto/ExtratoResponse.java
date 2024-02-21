@@ -1,20 +1,18 @@
 package github.mael.dto;
 
-import github.mael.model.TransacaoModel;
 import java.util.List;
 
 public class ExtratoResponse {
 
   private SaldoResponse saldo;
-  private List<TransacaoModel> ultimasTransacoes;
-
+  private List<UltimasTransacoesResponse> ultimas_transacoes;
 
   public ExtratoResponse() {
   }
 
-  public ExtratoResponse(SaldoResponse saldo, List<TransacaoModel> ultimasTransacoes) {
+  public ExtratoResponse(SaldoResponse saldo, List<UltimasTransacoesResponse> ultimas_transacoes) {
     this.saldo = saldo;
-    this.ultimasTransacoes = ultimasTransacoes;
+    this.ultimas_transacoes = ultimas_transacoes;
   }
 
   public SaldoResponse getSaldo() {
@@ -25,11 +23,11 @@ public class ExtratoResponse {
     this.saldo = saldo;
   }
 
-  public List<TransacaoModel> getUltimasTransacoes() {
-    return ultimasTransacoes;
+  public List<UltimasTransacoesResponse> getUltimas_transacoes() {
+    return ultimas_transacoes;
   }
 
-  public void setUltimasTransacoes(List<TransacaoModel> ultimasTransacoes) {
-    this.ultimasTransacoes = ultimasTransacoes;
+  public void setUltimas_transacoes(List<UltimasTransacoesResponse> ultimas_transacoes) {
+    this.ultimas_transacoes = ultimas_transacoes;
   }
 }

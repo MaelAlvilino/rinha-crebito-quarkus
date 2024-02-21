@@ -3,12 +3,12 @@ package github.mael;
 import github.mael.dto.SaldoResponse;
 import github.mael.dto.TransacaoRequest;
 import github.mael.dto.TransacaoResponse;
+import github.mael.dto.UltimasTransacoesResponse;
 import github.mael.model.ClienteModel;
 import github.mael.model.TransacaoModel;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
-import jakarta.persistence.TypedQuery;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 import github.mael.dto.ExtratoResponse;
 import github.mael.model.SaldoModel;
+import java.util.stream.Collectors;
 import org.jboss.resteasy.reactive.RestResponse;
 @Path("/clientes")
 @Produces(MediaType.APPLICATION_JSON)
@@ -55,11 +56,23 @@ public class Server {
 
             String dataExtrato = String.valueOf(new Date());
 
+            List<UltimasTransacoesResponse> convertTransacao =
+                transacoes.stream().map(transacao  -> {
+                        UltimasTransacoesResponse ultimaTransacao = new UltimasTransacoesResponse();
+                        ultimaTransacao.setValor(transacao.getValor());
+                        ultimaTransacao.setTipo(transacao.getTipo());
+                        ultimaTransacao.setDescricao(transacao.getDescricao());
+                        ultimaTransacao.setRealizada_em(transacao.getRealizadaEm());
+                        return ultimaTransacao;
+                    } )
+            .collect(Collectors.toList());
+
             ExtratoResponse extratoResponse = new ExtratoResponse();
             extratoResponse.setSaldo(new SaldoResponse(saldo, dataExtrato, cliente.getLimite()));
-            extratoResponse.setUltimasTransacoes(transacoes);
-            return RestResponse.ok(extratoResponse);
+            extratoResponse.setUltimas_transacoes(convertTransacao);
+           return RestResponse.ok(extratoResponse);
         } catch (Exception e) {
+            e.printStackTrace();
             return RestResponse.status(404);
         }
     }
@@ -84,11 +97,17 @@ public class Server {
                 return RestResponse.status(404);
             }
 
-            TypedQuery<SaldoModel> saldoQuery = entityManager.createQuery("SELECT s FROM "
-                + "SaldoModel s WHERE s.cliente = :cliente", SaldoModel.class);
-            saldoQuery.setLockMode(LockModeType.PESSIMISTIC_WRITE);
-            saldoQuery.setParameter("cliente", cliente);
-            SaldoModel saldo = saldoQuery.getSingleResult();
+
+            Query saldoQuery = entityManager.createNativeQuery("SELECT * FROM public"
+                + ".saldos WHERE "
+                + "public.saldos.cliente_id = :clienteId FOR UPDATE", SaldoModel.class);
+
+//            TypedQuery<SaldoModel> saldoQuery = entityManager.createQuery("SELECT s FROM "
+//                + "SaldoModel s WHERE s.cliente = :cliente", SaldoModel.class);
+//            saldoQuery.setLockMode(LockModeType.PESSIMISTIC_WRITE);
+            saldoQuery.setParameter("clienteId", cliente.getId());
+
+            SaldoModel saldo = (SaldoModel) saldoQuery.getSingleResult();
 
             Integer novoSaldo = saldo.getValor() + (tipo.equals("c") ? valor : -valor);
             if (novoSaldo < -cliente.getLimite()) {
@@ -106,7 +125,7 @@ public class Server {
 
             entityManager.merge(saldo);
             entityManager.merge(transacao);
-            return RestResponse.ok(new TransacaoResponse(cliente.getLimite(), novoSaldo));
+            return RestResponse.ok(new TransacaoResponse(cliente.getLimite(),novoSaldo));
         } catch (Exception e) {
             e.printStackTrace();
             return RestResponse.status(500);
@@ -114,7 +133,6 @@ public class Server {
     }
 
     private boolean isValid(TransacaoRequest request) {
-        System.out.println(request.getDescricao().length() > 10);
         return request != null
             && request.getValor() != null
             && request.getValor() > 0

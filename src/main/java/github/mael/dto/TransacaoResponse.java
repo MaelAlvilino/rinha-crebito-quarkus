@@ -2,11 +2,11 @@ package github.mael.dto;
 
 public class TransacaoResponse {
   private Integer limite;
-  private Integer novoSaldo;
+  private Integer saldo;
 
-  public TransacaoResponse(Integer limite, Integer novoSaldo) {
+  public TransacaoResponse(Integer limite, Integer saldo) {
     this.limite = limite;
-    this.novoSaldo = novoSaldo;
+    this.saldo = saldo;
   }
   public Integer getLimite() {
     return limite;
@@ -14,11 +14,11 @@ public class TransacaoResponse {
   public void setLimite(Integer limite) {
     this.limite = limite;
   }
-  public Integer getNovoSaldo() {
-    return novoSaldo;
+  public Integer getsaldo() {
+    return saldo;
   }
 
-  public void setNovoSaldo(Integer novoSaldo) {
-    this.novoSaldo = novoSaldo;
+  public void setsaldo(Integer saldo) {
+    this.saldo = saldo;
   }
 }
