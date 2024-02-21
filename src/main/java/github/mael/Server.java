@@ -1,5 +1,6 @@
 package github.mael;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import github.mael.dto.SaldoResponse;
 import github.mael.dto.TransacaoRequest;
 import github.mael.dto.TransacaoResponse;
@@ -27,118 +28,119 @@ import org.jboss.resteasy.reactive.RestResponse;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class Server {
-    @Inject
-    EntityManager entityManager;
-    @GET
-    @Path("/{clienteId}/extrato")
-    @Transactional
-    public RestResponse<ExtratoResponse> getExtrato(Long clienteId) {
-        try {
-            ClienteModel cliente = entityManager.find(ClienteModel.class, clienteId);
-            if (cliente == null) {
-                return RestResponse.status(404);
-            }
+  @Inject
+  EntityManager entityManager;
+  @GET
+  @Path("/{clienteId}/extrato")
+  @Transactional
+  public RestResponse<ExtratoResponse> getExtrato(Long clienteId) {
+    try {
+      ClienteModel cliente = entityManager.find(ClienteModel.class, clienteId);
+      if (cliente == null) {
+        return RestResponse.status(404);
+      }
 
-            List<TransacaoModel> transacoes = entityManager.createQuery(
-                    "SELECT t FROM TransacaoModel t WHERE t.cliente.id = :clienteId ORDER BY t"
-                        + ".realizadaEm DESC", TransacaoModel.class)
-                .setParameter("clienteId", clienteId)
-                .setMaxResults(10)
-                .getResultList();
+      List<TransacaoModel> transacoes = entityManager.createQuery(
+              "SELECT t FROM TransacaoModel t WHERE t.cliente.id = :clienteId ORDER BY t"
+                  + ".realizadaEm DESC", TransacaoModel.class)
+          .setParameter("clienteId", clienteId)
+          .setMaxResults(10)
+          .getResultList();
 
 
-            SaldoModel saldoAtual = entityManager.createQuery(
-                    "SELECT s FROM SaldoModel s WHERE s.cliente.id = :clienteId", SaldoModel.class)
-                .setParameter("clienteId", clienteId)
-                .getSingleResult();
+      SaldoModel saldoAtual = entityManager.createQuery(
+              "SELECT s FROM SaldoModel s WHERE s.cliente.id = :clienteId", SaldoModel.class)
+          .setParameter("clienteId", clienteId)
+          .getSingleResult();
 
-            Integer saldo = (saldoAtual != null) ? saldoAtual.getValor() : 0;
+      Integer saldo = (saldoAtual != null) ? saldoAtual.getValor() : 0;
 
-            String dataExtrato = String.valueOf(new Date());
+      String dataExtrato = String.valueOf(new Date());
 
-            List<UltimasTransacoesResponse> convertTransacao =
-                transacoes.stream().map(transacao  -> {
-                        UltimasTransacoesResponse ultimaTransacao = new UltimasTransacoesResponse();
-                        ultimaTransacao.setValor(transacao.getValor());
-                        ultimaTransacao.setTipo(transacao.getTipo());
-                        ultimaTransacao.setDescricao(transacao.getDescricao());
-                        ultimaTransacao.setRealizada_em(transacao.getRealizadaEm());
-                        return ultimaTransacao;
-                    } )
-            .collect(Collectors.toList());
+      List<UltimasTransacoesResponse> convertTransacao =
+          transacoes.stream().map(transacao  -> {
+                UltimasTransacoesResponse ultimaTransacao = new UltimasTransacoesResponse();
+                ultimaTransacao.setValor(transacao.getValor());
+                ultimaTransacao.setTipo(transacao.getTipo());
+                ultimaTransacao.setDescricao(transacao.getDescricao());
+                ultimaTransacao.setRealizada_em(transacao.getRealizadaEm());
+                return ultimaTransacao;
+              } )
+              .collect(Collectors.toList());
 
-            ExtratoResponse extratoResponse = new ExtratoResponse();
-            extratoResponse.setSaldo(new SaldoResponse(saldo, dataExtrato, cliente.getLimite()));
-            extratoResponse.setUltimas_transacoes(convertTransacao);
-           return RestResponse.ok(extratoResponse);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return RestResponse.status(404);
-        }
+      ExtratoResponse extratoResponse = new ExtratoResponse();
+      extratoResponse.setSaldo(new SaldoResponse(saldo, dataExtrato, cliente.getLimite()));
+      extratoResponse.setUltimas_transacoes(convertTransacao);
+      return RestResponse.ok(extratoResponse);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return RestResponse.status(404);
     }
+  }
 
-    @POST
-    @Path("/{id}/transacoes")
-    @Transactional
-    public RestResponse<TransacaoResponse> createTransacao(
-        Long id,
-        TransacaoRequest request) {
-        try {
-            Integer valor = request.getValor();
-            String tipo = request.getTipo();
-            String descricao = request.getDescricao();
-
-            if (!isValid(request)) {
-                return RestResponse.status(404);
-            }
-            ClienteModel cliente = entityManager.find(ClienteModel.class, id);
-
-            if (cliente == null) {
-                return RestResponse.status(404);
-            }
+  @POST
+  @Path("/{id}/transacoes")
+  @Transactional
+  public RestResponse<TransacaoResponse> createTransacao(
+      Long id,
+      TransacaoRequest request) {
+    try {
+      Integer valor = request.getValor();
+      String tipo = request.getTipo();
+      String descricao = request.getDescricao();
 
 
-            Query saldoQuery = entityManager.createNativeQuery("SELECT * FROM public"
-                + ".saldos WHERE "
-                + "public.saldos.cliente_id = :clienteId FOR UPDATE", SaldoModel.class);
+      if (!isValid(request)) {
+        return RestResponse.status(404);
+      }
+      ClienteModel cliente = entityManager.find(ClienteModel.class, id);
 
-//            TypedQuery<SaldoModel> saldoQuery = entityManager.createQuery("SELECT s FROM "
-//                + "SaldoModel s WHERE s.cliente = :cliente", SaldoModel.class);
-//            saldoQuery.setLockMode(LockModeType.PESSIMISTIC_WRITE);
-            saldoQuery.setParameter("clienteId", cliente.getId());
+      if (cliente == null) {
+        return RestResponse.status(404);
+      }
 
-            SaldoModel saldo = (SaldoModel) saldoQuery.getSingleResult();
+      Query saldoQuery = entityManager.createNativeQuery("SELECT * FROM public"
+          + ".saldos WHERE "
+          + "public.saldos.cliente_id = :clienteId FOR UPDATE", SaldoModel.class);
+      assert cliente != null;
+      saldoQuery.setParameter("clienteId", cliente.getId());
 
-            Integer novoSaldo = saldo.getValor() + (tipo.equals("c") ? valor : -valor);
-            if (novoSaldo < -cliente.getLimite()) {
-                return RestResponse.status(422);
-            }
+      SaldoModel saldo = (SaldoModel) saldoQuery.getSingleResult();
 
-            saldo.setValor(novoSaldo);
+      Integer novoSaldo = saldo.getValor() + (tipo.equals("c") ? valor : -valor);
+      if (novoSaldo < -cliente.getLimite()) {
+        return RestResponse.status(422);
+      }
 
-            TransacaoModel transacao = new TransacaoModel();
-            transacao.setCliente(cliente);
-            transacao.setValor(valor);
-            transacao.setTipo(tipo);
-            transacao.setDescricao(descricao);
-            transacao.setRealizadaEm(LocalDateTime.now());
+      saldo.setValor(novoSaldo);
 
-            entityManager.merge(saldo);
-            entityManager.merge(transacao);
-            return RestResponse.ok(new TransacaoResponse(cliente.getLimite(),novoSaldo));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return RestResponse.status(500);
-        }
+      TransacaoModel transacao = new TransacaoModel();
+      transacao.setCliente(cliente);
+      transacao.setValor(valor);
+      transacao.setTipo(tipo);
+      transacao.setDescricao(descricao);
+      transacao.setRealizadaEm(LocalDateTime.now());
+
+      entityManager.merge(saldo);
+      entityManager.merge(transacao);
+      return RestResponse.ok(new TransacaoResponse(cliente.getLimite(),novoSaldo));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return RestResponse.status(500);
     }
+  }
 
-    private boolean isValid(TransacaoRequest request) {
-        return request != null
-            && request.getValor() != null
-            && request.getValor() > 0
-            && (request.getTipo().equals("c") || request.getTipo().equals("d"))
-            && request.getDescricao() != null
-            && !request.getDescricao().isEmpty()
-            && request.getDescricao().length() < 10;
-    }
+  private boolean isValid(TransacaoRequest request) {
+    return request != null
+        && request.getValor() != null
+        && request.getValor() > 0
+        && (request.getTipo().equals("c") || request.getTipo().equals("d"))
+        && request.getDescricao() != null
+        && !request.getDescricao().isEmpty()
+        && request.getDescricao().length() < 11
+        && validaValor(request.getValor());
+  }
+  private boolean validaValor(double valor) {
+    return valor % 1 == 0;
+  }
 }
