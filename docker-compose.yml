@@ -5,7 +5,7 @@ services:
     image: maelalvi/quarkus-crebito
     build:
       context: .
-      dockerfile: src/main/docker/Dockerfile.jvm
+      dockerfile: src/main/docker/Dockerfile.native
     hostname: api01
     environment:
       - HOSTNAME=db
@@ -19,8 +19,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.00"
-          memory: "300MB"
+          cpus: "0.5"
+          memory: "100MB"
 
   api02:
     <<: *api
@@ -41,7 +41,7 @@ services:
       resources:
         limits:
           cpus: "0.15"
-          memory: "230MB"
+          memory: "50MB"
 
   db:
     image: postgres:latest
@@ -61,7 +61,7 @@ services:
       resources:
         limits:
           cpus: "0.45"
-          memory: "140MB"
+          memory: "300MB"
 
 volumes:
   pg-volume:

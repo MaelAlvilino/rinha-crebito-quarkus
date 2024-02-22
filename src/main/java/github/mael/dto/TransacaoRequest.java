@@ -2,7 +2,7 @@ package github.mael.dto;
 
   public class TransacaoRequest {
 
-  private Integer valor;
+  private Double valor;
   private String tipo;
   private String descricao;
 
@@ -10,17 +10,17 @@ package github.mael.dto;
   public TransacaoRequest() {
   }
 
-  public TransacaoRequest(Integer valor, String tipo, String descricao) {
+  public TransacaoRequest(Double valor, String tipo, String descricao) {
     this.valor = valor;
     this.tipo = tipo;
     this.descricao = descricao;
   }
 
-  public Integer getValor() {
+  public Double getValor() {
     return valor;
   }
 
-  public void setValor(Integer valor) {
+  public void setValor(Double valor) {
     this.valor = valor;
   }
 

@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import github.mael.dto.ExtratoResponse;
 import github.mael.model.SaldoModel;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.jboss.resteasy.reactive.RestResponse;
 @Path("/clientes")
@@ -85,13 +86,13 @@ public class Server {
       Long id,
       TransacaoRequest request) {
     try {
-      Integer valor = request.getValor();
+      int valor = request.getValor().intValue();
       String tipo = request.getTipo();
       String descricao = request.getDescricao();
 
 
       if (!isValid(request)) {
-        return RestResponse.status(404);
+        return RestResponse.status(422);
       }
       ClienteModel cliente = entityManager.find(ClienteModel.class, id);
 
@@ -140,7 +141,7 @@ public class Server {
         && request.getDescricao().length() < 11
         && validaValor(request.getValor());
   }
-  private boolean validaValor(double valor) {
+  private boolean validaValor(Double valor) {
     return valor % 1 == 0;
   }
 }
