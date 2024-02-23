@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   api01: &api
-    image: maelalvi/quarkus-crebito
+    image: maelalvilino/quarkus-rinha
     build:
       context: .
       dockerfile: src/main/docker/Dockerfile.native-micro

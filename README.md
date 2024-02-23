@@ -25,5 +25,4 @@ LinkedIn
 
 ## Como rodar:
 
-- ./mvnw clean package -Dnative
 - docker compose up 
