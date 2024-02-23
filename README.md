@@ -25,6 +25,5 @@ LinkedIn
 
 ## Como rodar:
 
-./mvnw package  # para rodar com a jvm
-./mvnw clean package -Dnative  # para rodar nativo, recomendado
-docker compose up 
+- ./mvnw clean package -Dnative
+- docker compose up 

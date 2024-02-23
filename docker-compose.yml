@@ -5,7 +5,7 @@ services:
     image: maelalvi/quarkus-crebito
     build:
       context: .
-      dockerfile: src/main/docker/Dockerfile.native
+      dockerfile: src/main/docker/Dockerfile.native-micro
     hostname: api01
     environment:
       - HOSTNAME=db
@@ -19,7 +19,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.5"
+          cpus: "0.4"
           memory: "100MB"
 
   api02:
@@ -60,8 +60,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.45"
-          memory: "300MB"
+          cpus: "0.9"
+          memory: "330MB"
 
 volumes:
   pg-volume:

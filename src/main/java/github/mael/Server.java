@@ -138,7 +138,7 @@ public class Server {
         && (request.getTipo().equals("c") || request.getTipo().equals("d"))
         && request.getDescricao() != null
         && !request.getDescricao().isEmpty()
-        && request.getDescricao().length() < 11
+        && request.getDescricao().length() <= 10
         && validaValor(request.getValor());
   }
   private boolean validaValor(Double valor) {
